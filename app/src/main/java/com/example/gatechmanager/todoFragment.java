@@ -2,9 +2,7 @@ package com.example.gatechmanager;
 
 import android.content.Context;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +11,19 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
 import java.util.ArrayList;
+import java.util.List;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,12 +32,10 @@ import java.util.ArrayList;
  */
 public class todoFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -94,7 +99,42 @@ public class todoFragment extends Fragment {
     //TODO checklist box: if checked, then deleted
     //TODO separate todo list for the exam and the assignment
     //TODO sorting options
+    private class CustomArrayAdapter extends ArrayAdapter<String> {
+        public CustomArrayAdapter(Context context, List<String> objects) {
+            super(context, android.R.layout.simple_list_item_1, objects);
+        }
 
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // Declare convertView as final
+            final View finalConvertView;
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_list_item, parent, false);
+            }
+            // Initialize finalConvertView with convertView
+            finalConvertView = convertView;
+
+            CheckBox checkBox = convertView.findViewById(R.id.checkBox);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        // Handle checkbox checked
+                        // For example, you can hide the item
+                        finalConvertView.setVisibility(View.GONE);
+                    } else {
+                        // Handle checkbox unchecked
+                        finalConvertView.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+            TextView textView = convertView.findViewById(R.id.textView);
+            textView.setText(getItem(position));
+
+            return convertView;
+        }
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -104,9 +144,9 @@ public class todoFragment extends Fragment {
         button = view.findViewById(R.id.button);
         editTextText = view.findViewById(R.id.editTextText);
 
-        // Initialize listView and set its adapter
+        // Initialize listView and set its custom adapter
         items = new ArrayList<>();
-        itemsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        itemsAdapter = new CustomArrayAdapter(getContext(), items);  // Initialize itemsAdapter
         listView.setAdapter(itemsAdapter);
 
         // Initialize button and set its click listener
@@ -117,7 +157,6 @@ public class todoFragment extends Fragment {
 
         return view;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
