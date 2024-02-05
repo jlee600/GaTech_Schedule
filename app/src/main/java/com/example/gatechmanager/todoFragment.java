@@ -14,7 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 import java.util.ArrayList;
 
 /**
@@ -36,6 +37,7 @@ public class todoFragment extends Fragment {
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView listView;
+    private EditText editTextText;
     private Button button;
 
     public todoFragment() {
@@ -50,7 +52,6 @@ public class todoFragment extends Fragment {
      * @param param2 Parameter 2.
      * @return A new instance of fragment todoFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static todoFragment newInstance(String param1, String param2) {
         todoFragment fragment = new todoFragment();
         Bundle args = new Bundle();
@@ -58,24 +59,6 @@ public class todoFragment extends Fragment {
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        listView = listView.findViewById(R.id.listView);
-        button = button.findViewById(R.id.button);
-        Context context = getContext().getApplicationContext();
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addItem(v);
-            }
-        });
-        items = new ArrayList<>();
-        itemsAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
-        listView.setAdapter(itemsAdapter);
-        setUpListViewListener();
     }
 
     private void setUpListViewListener() {
@@ -93,21 +76,51 @@ public class todoFragment extends Fragment {
 
     private void addItem(View v) {
         Context context = getContext().getApplicationContext();
-        EditText input = new EditText(context);
-        input = input.findViewById(R.id.editTextText);
-        String itemText = input.getText().toString();
-        if (!(itemText.equals(""))) {
+        String itemText = editTextText.getText().toString();
+        if (!itemText.isEmpty()) {
             itemsAdapter.add(itemText);
-            input.setText("");
+            editTextText.setText("");
+
+            // Hide the keyboard
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         } else {
-            Toast.makeText(context.getApplicationContext(), "Please Enter Text...", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Please Enter Text...", Toast.LENGTH_LONG).show();
         }
     }
 
+    //TODO attributes: exam, assignment, general
+    //TODO [attribute tab] [input]
+    //TODO delete, edit button
+    //TODO checklist box: if checked, then deleted
+    //TODO separate todo list for the exam and the assignment
+    //TODO sorting options
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_todo, container, false);
+        View view = inflater.inflate(R.layout.fragment_todo, container, false);
+
+        listView = view.findViewById(R.id.listView);
+        button = view.findViewById(R.id.button);
+        editTextText = view.findViewById(R.id.editTextText);
+
+        // Initialize listView and set its adapter
+        items = new ArrayList<>();
+        itemsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        listView.setAdapter(itemsAdapter);
+
+        // Initialize button and set its click listener
+        button.setOnClickListener(v -> addItem(v));
+
+        // Set up the ListView listener
+        setUpListViewListener();
+
+        return view;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 }
