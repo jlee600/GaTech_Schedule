@@ -2,21 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/schedule"
         android:title="Schedule"
-        android:icon="@drawable/baseline_calendar_month_24"
-        android:id="@+id/schedule"/>
+        android:icon="@drawable/baseline_calendar_month_24" />
+
     <item
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/add"
         android:title="Add"
-        android:icon="@drawable/baseline_add_box_24"
-        android:id="@+id/add"/>
+        android:icon="@drawable/baseline_add_box_24" />
+
     <item
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:title="To-Do"
-        android:icon="@drawable/baseline_checklist_24"
-        android:id="@+id/todo"/>
+        android:id="@+id/todo"
+        android:title="ToDo"
+        android:icon="@drawable/baseline_checklist_24" />
+
 </menu>
