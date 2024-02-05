@@ -90,7 +90,6 @@ public class todoFragment extends Fragment {
     }
 
     //TODO attributes: exam, assignment, general
-    //TODO [attribute tab] [input]
     //TODO delete, edit button
     //TODO checklist box: if checked, then deleted
     //TODO separate todo list for the exam and the assignment
