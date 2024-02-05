@@ -1,5 +1,6 @@
 package com.example.gatechmanager;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,14 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +32,11 @@ public class todoFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private ArrayList<String> items;
+    private ArrayAdapter<String> itemsAdapter;
+    private ListView listView;
+    private Button button;
 
     public todoFragment() {
         // Required empty public constructor
@@ -49,9 +63,44 @@ public class todoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+        listView = listView.findViewById(R.id.listView);
+        button = button.findViewById(R.id.button);
+        Context context = getContext().getApplicationContext();
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addItem(v);
+            }
+        });
+        items = new ArrayList<>();
+        itemsAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
+        listView.setAdapter(itemsAdapter);
+        setUpListViewListener();
+    }
+
+    private void setUpListViewListener() {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Context context = getContext().getApplicationContext();
+                Toast.makeText(context, "Removed from Todo list", Toast.LENGTH_LONG).show();
+                items.remove(position);
+                itemsAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+    }
+
+    private void addItem(View v) {
+        Context context = getContext().getApplicationContext();
+        EditText input = new EditText(context);
+        input = input.findViewById(R.id.editTextText);
+        String itemText = input.getText().toString();
+        if (!(itemText.equals(""))) {
+            itemsAdapter.add(itemText);
+            input.setText("");
+        } else {
+            Toast.makeText(context.getApplicationContext(), "Please Enter Text...", Toast.LENGTH_LONG).show();
         }
     }
 
