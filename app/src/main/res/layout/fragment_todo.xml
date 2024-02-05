@@ -36,7 +36,7 @@
         android:insetLeft="50dp"
         android:text="+ Add To List"
         android:textColorHighlight="#009688"
-        android:textColorLink="#@color/black"
+        android:textColorLink="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
