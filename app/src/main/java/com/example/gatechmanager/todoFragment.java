@@ -11,21 +11,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
-import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,7 +30,6 @@ import android.widget.LinearLayout;
  */
 public class todoFragment extends Fragment {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -51,14 +46,6 @@ public class todoFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment todoFragment.
-     */
     public static todoFragment newInstance(String param1, String param2) {
         todoFragment fragment = new todoFragment();
         Bundle args = new Bundle();
@@ -96,41 +83,50 @@ public class todoFragment extends Fragment {
         }
     }
 
-    //TODO attributes: exam, assignment, general
-    //TODO delete, edit button
-    //TODO separate todo list for the exam and the assignment
-    //TODO sorting options
     private class CustomArrayAdapter extends ArrayAdapter<String> {
         public CustomArrayAdapter(Context context, List<String> objects) {
-            super(context, android.R.layout.simple_list_item_1, objects);
+            super(context, R.layout.custom_list_item, objects);
         }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            // Declare convertView as final
             final View finalConvertView;
 
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_list_item, parent, false);
             }
-            // Initialize finalConvertView with convertView
+
             finalConvertView = convertView;
+
             CheckBox checkBox = convertView.findViewById(R.id.checkBox);
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        // Handle checkbox checked
-                        // For example, you can hide the item
                         finalConvertView.setVisibility(View.GONE);
                     } else {
-                        // Handle checkbox unchecked
                         finalConvertView.setVisibility(View.VISIBLE);
                     }
                 }
             });
 
-            TextView textView = convertView.findViewById(R.id.textView);
-            textView.setText(getItem(position));
+            TextView textViewDescription = convertView.findViewById(R.id.textViewDescription);
+            textViewDescription.setText(getItem(position));
+
+            // Additional TextViews for Attribute, Course, Date, Time, and Location
+            TextView textViewAttribute = convertView.findViewById(R.id.textViewAttribute);
+            TextView textViewCourse = convertView.findViewById(R.id.textViewCourse);
+            TextView textViewDate = convertView.findViewById(R.id.textViewDate);
+            TextView textViewTime = convertView.findViewById(R.id.textViewTime);
+            TextView textViewLocation = convertView.findViewById(R.id.textViewLocation);
+
+            // Set default values to N/A
+            textViewAttribute.setText("Attribute: N/A");
+            textViewCourse.setText("Course: N/A");
+            textViewDate.setText("Date: N/A");
+            textViewTime.setText("Time: N/A");
+            textViewLocation.setText("Location: N/A");
+
             // Add click listener for editing
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -138,27 +134,25 @@ public class todoFragment extends Fragment {
                     showEditDialog(position);
                 }
             });
+
             return convertView;
         }
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_todo, container, false);
 
         listView = view.findViewById(R.id.listView);
         button = view.findViewById(R.id.button);
         editTextText = view.findViewById(R.id.editTextText);
 
-        // Initialize listView and set its custom adapter
         items = new ArrayList<>();
-        itemsAdapter = new CustomArrayAdapter(getContext(), items);  // Initialize itemsAdapter
+        itemsAdapter = new CustomArrayAdapter(getContext(), items);
         listView.setAdapter(itemsAdapter);
 
-        // Initialize button and set its click listener
         button.setOnClickListener(v -> addItem(v));
 
-        // Set up the ListView listeners
         setUpListViewListener();
         setUpListViewClickListener();
 
@@ -169,28 +163,67 @@ public class todoFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Handle item click, for example, show a dialog or start an activity for editing
                 showEditDialog(position);
             }
         });
     }
 
-    private void showEditDialog(int position) {
+    private void showEditDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Edit Todo Item");
+        builder.setTitle("Enter Details");
 
-        // Set up the input
-        final EditText input = new EditText(getContext());
-        input.setText(items.get(position));
-        builder.setView(input);
+        // Create a layout for the input dialog (you can use a custom layout if needed)
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
 
-        // Set up the buttons
+        // Add EditTexts for Attribute, Course, Date, Time, and Location
+        final EditText attributeEditText = new EditText(getContext());
+        attributeEditText.setHint("Attribute");
+        layout.addView(attributeEditText);
+
+        final EditText courseEditText = new EditText(getContext());
+        courseEditText.setHint("Course");
+        layout.addView(courseEditText);
+
+        final EditText dateEditText = new EditText(getContext());
+        dateEditText.setHint("Date");
+        layout.addView(dateEditText);
+
+        final EditText timeEditText = new EditText(getContext());
+        timeEditText.setHint("Time");
+        layout.addView(timeEditText);
+
+        final EditText locationEditText = new EditText(getContext());
+        locationEditText.setHint("Location");
+        layout.addView(locationEditText);
+
+        builder.setView(layout);
+
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Update the item in the list
-                items.set(position, input.getText().toString());
-                itemsAdapter.notifyDataSetChanged();
+                // Retrieve values from EditTexts
+                String attribute = attributeEditText.getText().toString();
+                String course = courseEditText.getText().toString();
+                String date = dateEditText.getText().toString();
+                String time = timeEditText.getText().toString();
+                String location = locationEditText.getText().toString();
+
+                // Get the corresponding item view
+                View convertView = listView.getChildAt(position);
+
+                // Set values to TextViews
+                TextView textViewAttribute = convertView.findViewById(R.id.textViewAttribute);
+                TextView textViewCourse = convertView.findViewById(R.id.textViewCourse);
+                TextView textViewDate = convertView.findViewById(R.id.textViewDate);
+                TextView textViewTime = convertView.findViewById(R.id.textViewTime);
+                TextView textViewLocation = convertView.findViewById(R.id.textViewLocation);
+
+                textViewAttribute.setText("Attribute: " + attribute);
+                textViewCourse.setText("Course: " + course);
+                textViewDate.setText("Date: " + date);
+                textViewTime.setText("Time: " + time);
+                textViewLocation.setText("Location: " + location);
             }
         });
 
@@ -203,6 +236,8 @@ public class todoFragment extends Fragment {
 
         builder.show();
     }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
