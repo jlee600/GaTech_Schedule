@@ -1,6 +1,8 @@
 package com.example.gatechmanager;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -96,14 +98,12 @@ public class todoFragment extends Fragment {
 
     //TODO attributes: exam, assignment, general
     //TODO delete, edit button
-    //TODO checklist box: if checked, then deleted
     //TODO separate todo list for the exam and the assignment
     //TODO sorting options
     private class CustomArrayAdapter extends ArrayAdapter<String> {
         public CustomArrayAdapter(Context context, List<String> objects) {
             super(context, android.R.layout.simple_list_item_1, objects);
         }
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // Declare convertView as final
@@ -114,7 +114,6 @@ public class todoFragment extends Fragment {
             }
             // Initialize finalConvertView with convertView
             finalConvertView = convertView;
-
             CheckBox checkBox = convertView.findViewById(R.id.checkBox);
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -129,9 +128,16 @@ public class todoFragment extends Fragment {
                     }
                 }
             });
+
             TextView textView = convertView.findViewById(R.id.textView);
             textView.setText(getItem(position));
-
+            // Add click listener for editing
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showEditDialog(position);
+                }
+            });
             return convertView;
         }
     }
@@ -152,10 +158,50 @@ public class todoFragment extends Fragment {
         // Initialize button and set its click listener
         button.setOnClickListener(v -> addItem(v));
 
-        // Set up the ListView listener
+        // Set up the ListView listeners
         setUpListViewListener();
+        setUpListViewClickListener();
 
         return view;
+    }
+
+    private void setUpListViewClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Handle item click, for example, show a dialog or start an activity for editing
+                showEditDialog(position);
+            }
+        });
+    }
+
+    private void showEditDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Edit Todo Item");
+
+        // Set up the input
+        final EditText input = new EditText(getContext());
+        input.setText(items.get(position));
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Update the item in the list
+                items.set(position, input.getText().toString());
+                itemsAdapter.notifyDataSetChanged();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
