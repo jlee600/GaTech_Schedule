@@ -23,11 +23,6 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link todoFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class todoFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
@@ -36,14 +31,91 @@ public class todoFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private ArrayList<String> items;
-    private ArrayAdapter<String> itemsAdapter;
+    private ArrayList<TodoItem> items;
+    private ArrayAdapter<TodoItem> itemsAdapter;
     private ListView listView;
     private EditText editTextText;
     private Button button;
 
     public todoFragment() {
         // Required empty public constructor
+    }
+    public class TodoItem {
+        private String description;
+        private String attribute;
+        private String course;
+        private String date;
+        private String time;
+        private String location;
+        private boolean checked;
+
+        public TodoItem(String description) {
+            this.description = description;
+            this.attribute = "N/A";
+            this.course = "N/A";
+            this.date = "N/A";
+            this.time = "N/A";
+            this.location = "N/A";
+            this.checked = false;
+        }
+
+        // Getter and setter methods for all fields
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getAttribute() {
+            return attribute;
+        }
+
+        public void setAttribute(String attribute) {
+            this.attribute = attribute;
+        }
+
+        public String getCourse() {
+            return course;
+        }
+
+        public void setCourse(String course) {
+            this.course = course;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public void setLocation(String location) {
+            this.location = location;
+        }
+
+        public boolean isChecked() {
+            return checked;
+        }
+
+        public void setChecked(boolean checked) {
+            this.checked = checked;
+        }
     }
 
     public static todoFragment newInstance(String param1, String param2) {
@@ -72,7 +144,8 @@ public class todoFragment extends Fragment {
         Context context = getContext().getApplicationContext();
         String itemText = editTextText.getText().toString();
         if (!itemText.isEmpty()) {
-            itemsAdapter.add(itemText);
+            TodoItem newItem = new TodoItem(itemText);
+            itemsAdapter.add(newItem);
             editTextText.setText("");
 
             // Hide the keyboard
@@ -83,51 +156,49 @@ public class todoFragment extends Fragment {
         }
     }
 
-    private class CustomArrayAdapter extends ArrayAdapter<String> {
-        public CustomArrayAdapter(Context context, List<String> objects) {
+    private class CustomArrayAdapter extends ArrayAdapter<TodoItem> {
+        public CustomArrayAdapter(Context context, List<TodoItem> objects) {
             super(context, R.layout.custom_list_item, objects);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            final View finalConvertView;
-
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_list_item, parent, false);
             }
 
-            finalConvertView = convertView;
+            TodoItem currentItem = getItem(position);
 
             CheckBox checkBox = convertView.findViewById(R.id.checkBox);
+            checkBox.setChecked(currentItem.isChecked());
+            final View finalConvertView = convertView;
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    currentItem.setChecked(isChecked);
                     if (isChecked) {
-                        finalConvertView.setVisibility(View.GONE);
-                    } else {
-                        finalConvertView.setVisibility(View.VISIBLE);
+                        items.remove(currentItem);
                     }
+
+                    notifyDataSetChanged();
                 }
             });
 
             TextView textViewDescription = convertView.findViewById(R.id.textViewDescription);
-            textViewDescription.setText(getItem(position));
+            textViewDescription.setText(currentItem.getDescription());
 
-            // Additional TextViews for Attribute, Course, Date, Time, and Location
             TextView textViewAttribute = convertView.findViewById(R.id.textViewAttribute);
             TextView textViewCourse = convertView.findViewById(R.id.textViewCourse);
             TextView textViewDate = convertView.findViewById(R.id.textViewDate);
             TextView textViewTime = convertView.findViewById(R.id.textViewTime);
             TextView textViewLocation = convertView.findViewById(R.id.textViewLocation);
 
-            // Set default values to N/A
-            textViewAttribute.setText("Attribute: N/A");
-            textViewCourse.setText("Course: N/A");
-            textViewDate.setText("Date: N/A");
-            textViewTime.setText("Time: N/A");
-            textViewLocation.setText("Location: N/A");
+            textViewAttribute.setText("Attribute: " + currentItem.getAttribute());
+            textViewCourse.setText("Course: " + currentItem.getCourse());
+            textViewDate.setText("Date: " + currentItem.getDate());
+            textViewTime.setText("Time: " + currentItem.getTime());
+            textViewLocation.setText("Location: " + currentItem.getLocation());
 
-            // Add click listener for editing
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -172,29 +243,34 @@ public class todoFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Enter Details");
 
-        // Create a layout for the input dialog (you can use a custom layout if needed)
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        // Add EditTexts for Attribute, Course, Date, Time, and Location
+        final TodoItem currentItem = items.get(position);
+
         final EditText attributeEditText = new EditText(getContext());
         attributeEditText.setHint("Attribute");
+        attributeEditText.setText(currentItem.getAttribute());
         layout.addView(attributeEditText);
 
         final EditText courseEditText = new EditText(getContext());
         courseEditText.setHint("Course");
+        courseEditText.setText(currentItem.getCourse());
         layout.addView(courseEditText);
 
         final EditText dateEditText = new EditText(getContext());
         dateEditText.setHint("Date");
+        dateEditText.setText(currentItem.getDate());
         layout.addView(dateEditText);
 
         final EditText timeEditText = new EditText(getContext());
         timeEditText.setHint("Time");
+        timeEditText.setText(currentItem.getTime());
         layout.addView(timeEditText);
 
         final EditText locationEditText = new EditText(getContext());
         locationEditText.setHint("Location");
+        locationEditText.setText(currentItem.getLocation());
         layout.addView(locationEditText);
 
         builder.setView(layout);
@@ -202,41 +278,25 @@ public class todoFragment extends Fragment {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Retrieve values from EditTexts
-                String attribute = attributeEditText.getText().toString();
-                String course = courseEditText.getText().toString();
-                String date = dateEditText.getText().toString();
-                String time = timeEditText.getText().toString();
-                String location = locationEditText.getText().toString();
+                currentItem.setAttribute(attributeEditText.getText().toString());
+                currentItem.setCourse(courseEditText.getText().toString());
+                currentItem.setDate(dateEditText.getText().toString());
+                currentItem.setTime(timeEditText.getText().toString());
+                currentItem.setLocation(locationEditText.getText().toString());
 
-                // Get the corresponding item view
-                View convertView = listView.getChildAt(position);
-
-                // Set values to TextViews
-                TextView textViewAttribute = convertView.findViewById(R.id.textViewAttribute);
-                TextView textViewCourse = convertView.findViewById(R.id.textViewCourse);
-                TextView textViewDate = convertView.findViewById(R.id.textViewDate);
-                TextView textViewTime = convertView.findViewById(R.id.textViewTime);
-                TextView textViewLocation = convertView.findViewById(R.id.textViewLocation);
-
-                textViewAttribute.setText("Attribute: " + attribute);
-                textViewCourse.setText("Course: " + course);
-                textViewDate.setText("Date: " + date);
-                textViewTime.setText("Time: " + time);
-                textViewLocation.setText("Location: " + location);
+                itemsAdapter.notifyDataSetChanged();
             }
         });
 
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+                // Handle cancel
             }
         });
 
         builder.show();
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
