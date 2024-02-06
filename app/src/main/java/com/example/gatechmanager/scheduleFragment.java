@@ -1,67 +1,158 @@
 package com.example.gatechmanager;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link scheduleFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class scheduleFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private EditText titleEditText, startTimeEditText, endTimeEditText, locationEditText;
+    private Button addButton, displayButton;
+    private RecyclerView scheduleRecyclerView;
+    private ScheduleAdapter scheduleAdapter;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<ClassModel> classList = new ArrayList<>();
 
     public scheduleFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment scheduleFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static scheduleFragment newInstance(String param1, String param2) {
-        scheduleFragment fragment = new scheduleFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("scheduleFragment", "onCreateView called");
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_schedule, container, false);
+        View view = inflater.inflate(R.layout.fragment_schedule, container, false);
+
+        titleEditText = view.findViewById(R.id.titleEditText);
+        startTimeEditText = view.findViewById(R.id.startTimeEditText);
+        endTimeEditText = view.findViewById(R.id.endTimeEditText);
+        locationEditText = view.findViewById(R.id.locationEditText);
+        addButton = view.findViewById(R.id.addButton);
+        displayButton = view.findViewById(R.id.displayButton);
+        scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView);
+
+        scheduleAdapter = new ScheduleAdapter(classList);
+        scheduleRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        scheduleRecyclerView.setAdapter(scheduleAdapter);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addClass();
+            }
+        });
+
+        displayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // displayClasses() method is not needed anymore
+            }
+        });
+
+        return view;
     }
-    // Add this to onBottomNavigationItemSelected method in MainActivity
+
+    private void addClass() {
+        String title = titleEditText.getText().toString();
+        String startTime = startTimeEditText.getText().toString();
+        String endTime = endTimeEditText.getText().toString();
+        String location = locationEditText.getText().toString();
+
+        if (!title.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty() && !location.isEmpty()) {
+            ClassModel newClass = new ClassModel(title, startTime, endTime, location);
+            classList.add(newClass);
+
+            // Clear input fields after adding a class
+            titleEditText.getText().clear();
+            startTimeEditText.getText().clear();
+            endTimeEditText.getText().clear();
+            locationEditText.getText().clear();
+
+            // Notify the adapter that the data set has changed
+            scheduleAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public class ClassModel {
+        private String title;
+        private String startTime;
+        private String endTime;
+        private String location;
+
+        public ClassModel(String title, String startTime, String endTime, String location) {
+            this.title = title;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.location = location;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public String getEndTime() {
+            return endTime;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+    }
+
+    public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
+
+        private List<ClassModel> classList;
+
+        public ScheduleAdapter(List<ClassModel> classList) {
+            this.classList = classList;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_class, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            ClassModel classModel = classList.get(position);
+
+            holder.titleTextView.setText(classModel.getTitle());
+            holder.timeTextView.setText(String.format("%s - %s", classModel.getStartTime(), classModel.getEndTime()));
+            holder.locationTextView.setText(classModel.getLocation());
+        }
+
+        @Override
+        public int getItemCount() {
+            return classList.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView titleTextView;
+            TextView timeTextView;
+            TextView locationTextView;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                titleTextView = itemView.findViewById(R.id.titleTextView);
+                timeTextView = itemView.findViewById(R.id.timeTextView);
+                locationTextView = itemView.findViewById(R.id.locationTextView);
+            }
+        }
+    }
 }
