@@ -28,5 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Edit Location"/>
+    <EditText
+        android:id="@+id/editInstructorEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Instructor Name" />
 
 </LinearLayout>

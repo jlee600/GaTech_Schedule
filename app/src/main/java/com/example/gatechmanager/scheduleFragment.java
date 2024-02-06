@@ -20,7 +20,7 @@ import java.util.List;
 
 public class scheduleFragment extends Fragment {
 
-    private EditText titleEditText, startTimeEditText, endTimeEditText, locationEditText;
+    private EditText titleEditText, startTimeEditText, endTimeEditText, locationEditText, instructorEditText;
     private Button addButton;
     private RecyclerView scheduleRecyclerView;
     private ScheduleAdapter scheduleAdapter;
@@ -40,6 +40,7 @@ public class scheduleFragment extends Fragment {
         startTimeEditText = view.findViewById(R.id.startTimeEditText);
         endTimeEditText = view.findViewById(R.id.endTimeEditText);
         locationEditText = view.findViewById(R.id.locationEditText);
+        instructorEditText = view.findViewById(R.id.instructorEditText);
         addButton = view.findViewById(R.id.addButton);
         scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView);
 
@@ -62,9 +63,10 @@ public class scheduleFragment extends Fragment {
         String startTime = startTimeEditText.getText().toString();
         String endTime = endTimeEditText.getText().toString();
         String location = locationEditText.getText().toString();
+        String instructor = instructorEditText.getText().toString();
 
-        if (!title.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty() && !location.isEmpty()) {
-            ClassModel newClass = new ClassModel(title, startTime, endTime, location);
+        if (!title.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty() && !location.isEmpty() && !instructor.isEmpty()) {
+            ClassModel newClass = new ClassModel(title, startTime, endTime, location, instructor);
             classList.add(newClass);
 
             // Clear input fields after adding a class
@@ -72,6 +74,7 @@ public class scheduleFragment extends Fragment {
             startTimeEditText.getText().clear();
             endTimeEditText.getText().clear();
             locationEditText.getText().clear();
+            instructorEditText.getText().clear();
 
             // Notify the adapter that the data set has changed
             scheduleAdapter.notifyDataSetChanged();
@@ -83,44 +86,54 @@ public class scheduleFragment extends Fragment {
         private String startTime;
         private String endTime;
         private String location;
+        private String instructor;
 
-        public ClassModel(String title, String startTime, String endTime, String location) {
+        public ClassModel(String title, String startTime, String endTime, String location, String instructor) {
             this.title = title;
             this.startTime = startTime;
             this.endTime = endTime;
             this.location = location;
+            this.instructor = instructor;
         }
 
         public String getTitle() {
             return title;
         }
 
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
         public String getStartTime() {
             return startTime;
-        }
-
-        public void setStartTime(String startTime) {
-            this.startTime = startTime;
         }
 
         public String getEndTime() {
             return endTime;
         }
 
-        public void setEndTime(String endTime) {
-            this.endTime = endTime;
-        }
-
         public String getLocation() {
             return location;
         }
 
+        public String getInstructor() {
+            return instructor;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
+        }
+
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+
         public void setLocation(String location) {
             this.location = location;
+        }
+
+        public void setInstructor(String instructor) {
+            this.instructor = instructor;
         }
     }
 
@@ -145,6 +158,7 @@ public class scheduleFragment extends Fragment {
             holder.titleTextView.setText(classModel.getTitle());
             holder.timeTextView.setText(String.format("%s - %s", classModel.getStartTime(), classModel.getEndTime()));
             holder.locationTextView.setText(classModel.getLocation());
+            holder.instructorTextView.setText(classModel.getInstructor());
 
             holder.editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -173,6 +187,7 @@ public class scheduleFragment extends Fragment {
             TextView titleTextView;
             TextView timeTextView;
             TextView locationTextView;
+            TextView instructorTextView;
             Button editButton;
             Button deleteButton;
 
@@ -181,6 +196,7 @@ public class scheduleFragment extends Fragment {
                 titleTextView = itemView.findViewById(R.id.titleTextView);
                 timeTextView = itemView.findViewById(R.id.timeTextView);
                 locationTextView = itemView.findViewById(R.id.locationTextView);
+                instructorTextView = itemView.findViewById(R.id.instructorTextView);
                 editButton = itemView.findViewById(R.id.editButton);
                 deleteButton = itemView.findViewById(R.id.deleteButton);
             }
@@ -193,11 +209,13 @@ public class scheduleFragment extends Fragment {
             EditText editStartTimeEditText = dialogView.findViewById(R.id.editStartTimeEditText);
             EditText editEndTimeEditText = dialogView.findViewById(R.id.editEndTimeEditText);
             EditText editLocationEditText = dialogView.findViewById(R.id.editLocationEditText);
+            EditText editInstructorEditText = dialogView.findViewById(R.id.editInstructorEditText);
 
             editTitleEditText.setText(classModel.getTitle());
             editStartTimeEditText.setText(classModel.getStartTime());
             editEndTimeEditText.setText(classModel.getEndTime());
             editLocationEditText.setText(classModel.getLocation());
+            editInstructorEditText.setText(classModel.getInstructor());
 
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setView(dialogView)
@@ -209,11 +227,13 @@ public class scheduleFragment extends Fragment {
                             String editedStartTime = editStartTimeEditText.getText().toString();
                             String editedEndTime = editEndTimeEditText.getText().toString();
                             String editedLocation = editLocationEditText.getText().toString();
+                            String editedInstructor = editInstructorEditText.getText().toString();
 
                             classModel.setTitle(editedTitle);
                             classModel.setStartTime(editedStartTime);
                             classModel.setEndTime(editedEndTime);
                             classModel.setLocation(editedLocation);
+                            classModel.setInstructor(editedInstructor);
 
                             notifyDataSetChanged();
                         }
@@ -225,9 +245,3 @@ public class scheduleFragment extends Fragment {
         }
     }
 }
-
-
-
-
-
-
