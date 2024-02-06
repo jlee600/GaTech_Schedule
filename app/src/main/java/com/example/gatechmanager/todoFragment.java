@@ -368,16 +368,21 @@ public class todoFragment extends Fragment {
                     return 1;
                 } else if (!date1.equals("N/A") && date2.equals("N/A")) {
                     return -1;
+                } else if (date1.equals("N/A") && date2.equals("N/A")) {
+                    return 0; // Both are "N/A," so no change in order
                 } else {
-                    // Compare non-"N/A" dates using MM/dd format
-                    SimpleDateFormat format = new SimpleDateFormat("MM/dd", Locale.US);
+                    // Compare non-"N/A" dates using MMMM/dd format
+                    SimpleDateFormat format = new SimpleDateFormat("MMMM/dd", Locale.US);
                     try {
-                        Date dateObj1 = date1.equals("N/A") ? null : format.parse(date1);
-                        Date dateObj2 = date2.equals("N/A") ? null : format.parse(date2);
+                        Date dateObj1 = format.parse(date1);
+                        Date dateObj2 = format.parse(date2);
 
-                        if (dateObj1 != null && dateObj2 != null) {
-                            return dateObj1.compareTo(dateObj2);
+                        // Handle the case where dates are the same
+                        if (dateObj1.equals(dateObj2)) {
+                            return 0;
                         }
+
+                        return dateObj1.compareTo(dateObj2);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -387,6 +392,8 @@ public class todoFragment extends Fragment {
         });
         itemsAdapter.notifyDataSetChanged();
     }
+
+
 
 
 
