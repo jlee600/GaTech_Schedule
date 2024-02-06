@@ -1,5 +1,3 @@
-<!-- fragment_schedule.xml -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,10 +11,16 @@
         android:hint="Class Title" />
 
     <EditText
-        android:id="@+id/timeEditText"
+        android:id="@+id/startTimeEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Class Time" />
+        android:hint="Start Time" />
+
+    <EditText
+        android:id="@+id/endTimeEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="End Time" />
 
     <EditText
         android:id="@+id/locationEditText"
@@ -36,11 +40,10 @@
         android:layout_height="wrap_content"
         android:text="Display Classes" />
 
-    <TextView
-        android:id="@+id/scheduleTextView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/scheduleRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Schedule will be displayed here"
-        android:textSize="16sp" />
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
+

@@ -1,25 +1,27 @@
-// scheduleFragment.java
-
 package com.example.gatechmanager;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class scheduleFragment extends Fragment {
 
-    private EditText titleEditText, timeEditText, locationEditText;
+    private EditText titleEditText, startTimeEditText, endTimeEditText, locationEditText;
     private Button addButton, displayButton;
-    private TextView scheduleTextView;
+    private RecyclerView scheduleRecyclerView;
+    private ScheduleAdapter scheduleAdapter;
 
     private List<ClassModel> classList = new ArrayList<>();
 
@@ -33,11 +35,16 @@ public class scheduleFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
 
         titleEditText = view.findViewById(R.id.titleEditText);
-        timeEditText = view.findViewById(R.id.timeEditText);
+        startTimeEditText = view.findViewById(R.id.startTimeEditText);
+        endTimeEditText = view.findViewById(R.id.endTimeEditText);
         locationEditText = view.findViewById(R.id.locationEditText);
         addButton = view.findViewById(R.id.addButton);
         displayButton = view.findViewById(R.id.displayButton);
-        scheduleTextView = view.findViewById(R.id.scheduleTextView);
+        scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView);
+
+        scheduleAdapter = new ScheduleAdapter(classList);
+        scheduleRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        scheduleRecyclerView.setAdapter(scheduleAdapter);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,7 +56,7 @@ public class scheduleFragment extends Fragment {
         displayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayClasses();
+                // displayClasses() method is not needed anymore
             }
         });
 
@@ -58,40 +65,35 @@ public class scheduleFragment extends Fragment {
 
     private void addClass() {
         String title = titleEditText.getText().toString();
-        String time = timeEditText.getText().toString();
+        String startTime = startTimeEditText.getText().toString();
+        String endTime = endTimeEditText.getText().toString();
         String location = locationEditText.getText().toString();
 
-        if (!title.isEmpty() && !time.isEmpty() && !location.isEmpty()) {
-            ClassModel newClass = new ClassModel(title, time, location);
+        if (!title.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty() && !location.isEmpty()) {
+            ClassModel newClass = new ClassModel(title, startTime, endTime, location);
             classList.add(newClass);
 
             // Clear input fields after adding a class
             titleEditText.getText().clear();
-            timeEditText.getText().clear();
+            startTimeEditText.getText().clear();
+            endTimeEditText.getText().clear();
             locationEditText.getText().clear();
+
+            // Notify the adapter that the data set has changed
+            scheduleAdapter.notifyDataSetChanged();
         }
     }
 
-    private void displayClasses() {
-        StringBuilder scheduleText = new StringBuilder();
-        for (ClassModel classModel : classList) {
-            scheduleText.append("Title: ").append(classModel.getTitle())
-                    .append(", Time: ").append(classModel.getTime())
-                    .append(", Location: ").append(classModel.getLocation())
-                    .append("\n");
-        }
-        scheduleTextView.setText(scheduleText.toString());
-    }
-
-    // ClassModel is included here in the same file
     public class ClassModel {
         private String title;
-        private String time;
+        private String startTime;
+        private String endTime;
         private String location;
 
-        public ClassModel(String title, String time, String location) {
+        public ClassModel(String title, String startTime, String endTime, String location) {
             this.title = title;
-            this.time = time;
+            this.startTime = startTime;
+            this.endTime = endTime;
             this.location = location;
         }
 
@@ -99,12 +101,58 @@ public class scheduleFragment extends Fragment {
             return title;
         }
 
-        public String getTime() {
-            return time;
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public String getEndTime() {
+            return endTime;
         }
 
         public String getLocation() {
             return location;
+        }
+    }
+
+    public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
+
+        private List<ClassModel> classList;
+
+        public ScheduleAdapter(List<ClassModel> classList) {
+            this.classList = classList;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_class, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            ClassModel classModel = classList.get(position);
+
+            holder.titleTextView.setText(classModel.getTitle());
+            holder.timeTextView.setText(String.format("%s - %s", classModel.getStartTime(), classModel.getEndTime()));
+            holder.locationTextView.setText(classModel.getLocation());
+        }
+
+        @Override
+        public int getItemCount() {
+            return classList.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView titleTextView;
+            TextView timeTextView;
+            TextView locationTextView;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                titleTextView = itemView.findViewById(R.id.titleTextView);
+                timeTextView = itemView.findViewById(R.id.timeTextView);
+                locationTextView = itemView.findViewById(R.id.locationTextView);
+            }
         }
     }
 }
