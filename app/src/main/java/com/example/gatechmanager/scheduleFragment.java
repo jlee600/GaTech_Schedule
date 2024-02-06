@@ -1,12 +1,14 @@
 package com.example.gatechmanager;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -93,16 +95,32 @@ public class scheduleFragment extends Fragment {
             return title;
         }
 
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
         public String getStartTime() {
             return startTime;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
         }
 
         public String getEndTime() {
             return endTime;
         }
 
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+
         public String getLocation() {
             return location;
+        }
+
+        public void setLocation(String location) {
+            this.location = location;
         }
     }
 
@@ -127,6 +145,23 @@ public class scheduleFragment extends Fragment {
             holder.titleTextView.setText(classModel.getTitle());
             holder.timeTextView.setText(String.format("%s - %s", classModel.getStartTime(), classModel.getEndTime()));
             holder.locationTextView.setText(classModel.getLocation());
+
+            holder.editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Implement edit functionality here
+                    ClassModel classModel = classList.get(position);
+                    showEditDialog(v.getContext(), classModel);
+                }
+            });
+
+            holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    classList.remove(position);
+                    notifyDataSetChanged();
+                }
+            });
         }
 
         @Override
@@ -138,13 +173,61 @@ public class scheduleFragment extends Fragment {
             TextView titleTextView;
             TextView timeTextView;
             TextView locationTextView;
+            Button editButton;
+            Button deleteButton;
 
             public ViewHolder(View itemView) {
                 super(itemView);
                 titleTextView = itemView.findViewById(R.id.titleTextView);
                 timeTextView = itemView.findViewById(R.id.timeTextView);
                 locationTextView = itemView.findViewById(R.id.locationTextView);
+                editButton = itemView.findViewById(R.id.editButton);
+                deleteButton = itemView.findViewById(R.id.deleteButton);
             }
+        }
+
+        private void showEditDialog(Context context, ClassModel classModel) {
+            View dialogView = LayoutInflater.from(context).inflate(R.layout.edit_class_dialog, null);
+
+            EditText editTitleEditText = dialogView.findViewById(R.id.editTitleEditText);
+            EditText editStartTimeEditText = dialogView.findViewById(R.id.editStartTimeEditText);
+            EditText editEndTimeEditText = dialogView.findViewById(R.id.editEndTimeEditText);
+            EditText editLocationEditText = dialogView.findViewById(R.id.editLocationEditText);
+
+            editTitleEditText.setText(classModel.getTitle());
+            editStartTimeEditText.setText(classModel.getStartTime());
+            editEndTimeEditText.setText(classModel.getEndTime());
+            editLocationEditText.setText(classModel.getLocation());
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setView(dialogView)
+                    .setTitle("Edit Class")
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String editedTitle = editTitleEditText.getText().toString();
+                            String editedStartTime = editStartTimeEditText.getText().toString();
+                            String editedEndTime = editEndTimeEditText.getText().toString();
+                            String editedLocation = editLocationEditText.getText().toString();
+
+                            classModel.setTitle(editedTitle);
+                            classModel.setStartTime(editedStartTime);
+                            classModel.setEndTime(editedEndTime);
+                            classModel.setLocation(editedLocation);
+
+                            notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("Cancel", null);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 }
+
+
+
+
+
+
