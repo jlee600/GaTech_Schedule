@@ -34,16 +34,12 @@
         android:layout_height="wrap_content"
         android:text="Add Class" />
 
-    <Button
-        android:id="@+id/displayButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Display Classes" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/scheduleRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
+
 </LinearLayout>
+
 
