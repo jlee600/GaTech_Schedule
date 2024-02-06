@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.example.gatechmanager.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
+    //revert commit test 1
     ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
