@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
     <!-- Checkbox and original TextView -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="start">
 
         <CheckBox
             android:id="@+id/checkBox"
@@ -26,11 +28,12 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Attribute, Course, Date, Time, and Location with smaller font size -->
+    <!-- Attribute, Course, and Date with smaller font size -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center"
         android:paddingStart="5dp">
 
         <TextView
@@ -55,6 +58,15 @@
             android:text=""
             android:textSize="14sp"
             android:paddingStart="10dp" />
+    </LinearLayout>
+
+    <!-- Time and Location with smaller font size -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingStart="5dp">
 
         <TextView
             android:id="@+id/textViewTime"

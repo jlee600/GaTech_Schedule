@@ -248,6 +248,11 @@ public class todoFragment extends Fragment {
 
         final TodoItem currentItem = items.get(position);
 
+        final EditText descriptionEditText = new EditText(getContext());
+        descriptionEditText.setHint("Description");
+        descriptionEditText.setText(currentItem.getDescription());
+        layout.addView(descriptionEditText);
+
         final EditText attributeEditText = new EditText(getContext());
         attributeEditText.setHint("Attribute");
         attributeEditText.setText(currentItem.getAttribute());
@@ -278,6 +283,7 @@ public class todoFragment extends Fragment {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                currentItem.setDescription(descriptionEditText.getText().toString());
                 currentItem.setAttribute(attributeEditText.getText().toString());
                 currentItem.setCourse(courseEditText.getText().toString());
                 currentItem.setDate(dateEditText.getText().toString());
