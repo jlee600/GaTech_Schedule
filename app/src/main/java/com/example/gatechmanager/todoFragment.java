@@ -5,7 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,8 +25,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class todoFragment extends Fragment {
 
@@ -40,6 +51,7 @@ public class todoFragment extends Fragment {
     public todoFragment() {
         // Required empty public constructor
     }
+
     public class TodoItem {
         private String description;
         private String attribute;
@@ -60,7 +72,6 @@ public class todoFragment extends Fragment {
         }
 
         // Getter and setter methods for all fields
-
         public String getDescription() {
             return description;
         }
@@ -226,6 +237,7 @@ public class todoFragment extends Fragment {
 
         setUpListViewListener();
         setUpListViewClickListener();
+        setHasOptionsMenu(true);
 
         return view;
     }
@@ -254,7 +266,7 @@ public class todoFragment extends Fragment {
         layout.addView(descriptionEditText);
 
         final EditText attributeEditText = new EditText(getContext());
-        attributeEditText.setHint("Attribute");
+        attributeEditText.setHint("Attribute (Exam, HW, General)");
         attributeEditText.setText(currentItem.getAttribute());
         layout.addView(attributeEditText);
 
@@ -264,7 +276,7 @@ public class todoFragment extends Fragment {
         layout.addView(courseEditText);
 
         final EditText dateEditText = new EditText(getContext());
-        dateEditText.setHint("Date");
+        dateEditText.setHint("Date (MM/DD -> Jan/12)");
         dateEditText.setText(currentItem.getDate());
         layout.addView(dateEditText);
 
@@ -303,9 +315,87 @@ public class todoFragment extends Fragment {
 
         builder.show();
     }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.todo_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.menu_sort_by_course) {
+            sortByCourse();
+            return true;
+        } else if (itemId == R.id.menu_sort_by_due_date) {
+            sortByDueDate();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+    private void sortByCourse() {
+        // Implement sorting by course logic here
+        Collections.sort(items, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem item1, TodoItem item2) {
+                String course1 = item1.getCourse();
+                String course2 = item2.getCourse();
+
+                // Ensure "N/A" goes down
+                if (course1.equals("N/A") && !course2.equals("N/A")) {
+                    return 1;
+                } else if (!course1.equals("N/A") && course2.equals("N/A")) {
+                    return -1;
+                } else {
+                    // Compare non-"N/A" courses
+                    return course1.compareTo(course2);
+                }
+            }
+        });
+        itemsAdapter.notifyDataSetChanged();
+    }
+    private void sortByDueDate() {
+        // Implement sorting by due date logic here
+        Collections.sort(items, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem item1, TodoItem item2) {
+                String date1 = item1.getDate();
+                String date2 = item2.getDate();
+
+                // Ensure "N/A" goes down
+                if (date1.equals("N/A") && !date2.equals("N/A")) {
+                    return 1;
+                } else if (!date1.equals("N/A") && date2.equals("N/A")) {
+                    return -1;
+                } else {
+                    // Compare non-"N/A" dates using MM/dd format
+                    SimpleDateFormat format = new SimpleDateFormat("MM/dd", Locale.US);
+                    try {
+                        Date dateObj1 = date1.equals("N/A") ? null : format.parse(date1);
+                        Date dateObj2 = date2.equals("N/A") ? null : format.parse(date2);
+
+                        if (dateObj1 != null && dateObj2 != null) {
+                            return dateObj1.compareTo(dateObj2);
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    return 0;
+                }
+            }
+        });
+        itemsAdapter.notifyDataSetChanged();
+    }
+
+
+
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 }
+

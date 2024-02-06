@@ -5,11 +5,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.os.Bundle;
+import android.view.Menu;
+
 import com.example.gatechmanager.databinding.ActivityMainBinding;
+import androidx.appcompat.widget.Toolbar;
+import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
-    //revert commit test 1
+
     ActivityMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,15 +33,16 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
-    private void replaceFragment(Fragment fragment){
-
+    private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout,fragment);
+        fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit();
     }
-
 }
+
 
