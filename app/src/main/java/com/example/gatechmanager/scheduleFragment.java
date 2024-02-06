@@ -19,7 +19,7 @@ import java.util.List;
 public class scheduleFragment extends Fragment {
 
     private EditText titleEditText, startTimeEditText, endTimeEditText, locationEditText;
-    private Button addButton, displayButton;
+    private Button addButton;
     private RecyclerView scheduleRecyclerView;
     private ScheduleAdapter scheduleAdapter;
 
@@ -39,7 +39,6 @@ public class scheduleFragment extends Fragment {
         endTimeEditText = view.findViewById(R.id.endTimeEditText);
         locationEditText = view.findViewById(R.id.locationEditText);
         addButton = view.findViewById(R.id.addButton);
-        displayButton = view.findViewById(R.id.displayButton);
         scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView);
 
         scheduleAdapter = new ScheduleAdapter(classList);
@@ -50,13 +49,6 @@ public class scheduleFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 addClass();
-            }
-        });
-
-        displayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // displayClasses() method is not needed anymore
             }
         });
 
