@@ -1,67 +1,110 @@
+// scheduleFragment.java
+
 package com.example.gatechmanager;
 
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link scheduleFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class scheduleFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private EditText titleEditText, timeEditText, locationEditText;
+    private Button addButton, displayButton;
+    private TextView scheduleTextView;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<ClassModel> classList = new ArrayList<>();
 
     public scheduleFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment scheduleFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static scheduleFragment newInstance(String param1, String param2) {
-        scheduleFragment fragment = new scheduleFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("scheduleFragment", "onCreateView called");
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_schedule, container, false);
+        View view = inflater.inflate(R.layout.fragment_schedule, container, false);
+
+        titleEditText = view.findViewById(R.id.titleEditText);
+        timeEditText = view.findViewById(R.id.timeEditText);
+        locationEditText = view.findViewById(R.id.locationEditText);
+        addButton = view.findViewById(R.id.addButton);
+        displayButton = view.findViewById(R.id.displayButton);
+        scheduleTextView = view.findViewById(R.id.scheduleTextView);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addClass();
+            }
+        });
+
+        displayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayClasses();
+            }
+        });
+
+        return view;
     }
-    // Add this to onBottomNavigationItemSelected method in MainActivity
+
+    private void addClass() {
+        String title = titleEditText.getText().toString();
+        String time = timeEditText.getText().toString();
+        String location = locationEditText.getText().toString();
+
+        if (!title.isEmpty() && !time.isEmpty() && !location.isEmpty()) {
+            ClassModel newClass = new ClassModel(title, time, location);
+            classList.add(newClass);
+
+            // Clear input fields after adding a class
+            titleEditText.getText().clear();
+            timeEditText.getText().clear();
+            locationEditText.getText().clear();
+        }
+    }
+
+    private void displayClasses() {
+        StringBuilder scheduleText = new StringBuilder();
+        for (ClassModel classModel : classList) {
+            scheduleText.append("Title: ").append(classModel.getTitle())
+                    .append(", Time: ").append(classModel.getTime())
+                    .append(", Location: ").append(classModel.getLocation())
+                    .append("\n");
+        }
+        scheduleTextView.setText(scheduleText.toString());
+    }
+
+    // ClassModel is included here in the same file
+    public class ClassModel {
+        private String title;
+        private String time;
+        private String location;
+
+        public ClassModel(String title, String time, String location) {
+            this.title = title;
+            this.time = time;
+            this.location = location;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+    }
 }
