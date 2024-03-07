@@ -49,7 +49,6 @@ public class todoFragment extends Fragment {
     private Button button;
 
     public todoFragment() {
-        // Required empty public constructor
     }
 
     public class TodoItem {
@@ -168,6 +167,8 @@ public class todoFragment extends Fragment {
     }
 
     private class CustomArrayAdapter extends ArrayAdapter<TodoItem> {
+        private List<TodoItem> masterList;
+
         public CustomArrayAdapter(Context context, List<TodoItem> objects) {
             super(context, R.layout.custom_list_item, objects);
         }
