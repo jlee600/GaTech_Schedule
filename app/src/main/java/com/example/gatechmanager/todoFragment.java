@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Spinner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,13 +39,9 @@ import java.util.Locale;
 import java.util.Set;
 
 public class todoFragment extends Fragment {
-
+    public static final String[] VALID_ATTRIBUTES = {"Exam", "HW", "General"};
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
-
     private ArrayList<TodoItem> items;
     private ArrayAdapter<TodoItem> itemsAdapter;
     private ListView listView;
@@ -65,11 +62,6 @@ public class todoFragment extends Fragment {
 
         public TodoItem(String description) {
             this.description = description;
-            this.attribute = "N/A";
-            this.course = "N/A";
-            this.date = "N/A";
-            this.time = "N/A";
-            this.location = "N/A";
             this.completed = false;
         }
 
@@ -161,6 +153,9 @@ public class todoFragment extends Fragment {
             itemsAdapter.add(newItem);
             editTextText.setText("");
 
+            // Show the edit dialog for the newly added item
+            showEditDialog(itemsAdapter.getCount() - 1);
+
             // Hide the keyboard
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -209,7 +204,7 @@ public class todoFragment extends Fragment {
             TextView textViewTime = convertView.findViewById(R.id.textViewTime);
             TextView textViewLocation = convertView.findViewById(R.id.textViewLocation);
 
-            textViewAttribute.setText("Attribute: " + currentItem.getAttribute());
+            textViewAttribute.setText("Type: " + currentItem.getAttribute());
             textViewCourse.setText("Course: " + currentItem.getCourse());
             textViewDate.setText("Date: " + currentItem.getDate());
             textViewTime.setText("Time: " + currentItem.getTime());
@@ -233,21 +228,21 @@ public class todoFragment extends Fragment {
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // You can handle the click event for the entire item if needed
                 }
             });
 
             return convertView;
         }
+
         private void removeItem(int position) {
             masterList.remove(position);
             notifyDataSetChanged();
         }
+
         public void clearCheckedPositions() {
             checkedPositions.clear();
         }
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -293,10 +288,11 @@ public class todoFragment extends Fragment {
         descriptionEditText.setText(currentItem.getDescription());
         layout.addView(descriptionEditText);
 
-        final EditText attributeEditText = new EditText(getContext());
-        attributeEditText.setHint("Attribute (Exam, HW, General)");
-        attributeEditText.setText(currentItem.getAttribute());
-        layout.addView(attributeEditText);
+        final Spinner attributeSpinner = new Spinner(getContext());
+        ArrayAdapter<String> attributeAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, VALID_ATTRIBUTES);
+        attributeSpinner.setAdapter(attributeAdapter);
+        attributeSpinner.setSelection(attributeAdapter.getPosition(currentItem.getAttribute()));
+        layout.addView(attributeSpinner);
 
         final EditText courseEditText = new EditText(getContext());
         courseEditText.setHint("Course");
@@ -324,7 +320,7 @@ public class todoFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 currentItem.setDescription(descriptionEditText.getText().toString());
-                currentItem.setAttribute(attributeEditText.getText().toString());
+                currentItem.setAttribute(attributeSpinner.getSelectedItem().toString());
                 currentItem.setCourse(courseEditText.getText().toString());
                 currentItem.setDate(dateEditText.getText().toString());
                 currentItem.setTime(timeEditText.getText().toString());
@@ -334,20 +330,16 @@ public class todoFragment extends Fragment {
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Handle cancel
-            }
-        });
-
         builder.show();
     }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.todo_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         int itemId = item.getItemId();
@@ -358,13 +350,45 @@ public class todoFragment extends Fragment {
         } else if (itemId == R.id.menu_sort_by_due_date) {
             sortByDueDate();
             return true;
-        } else if (itemId == R.id.menu_sort_by_completion_status) {
-            sortByCompletionStatus();
+        } else if (itemId == R.id.menu_sort_by_exam) {
+            sortByAttribute("Exam");
+            return true;
+        } else if (itemId == R.id.menu_sort_by_hw) {
+            sortByAttribute("HW");
+            return true;
+        } else if (itemId == R.id.menu_sort_by_general) {
+            sortByAttribute("General");
+            return true;
+        } else if (itemId == R.id.menu_reset) {
+            resetList();
             return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
     }
+
+    private void resetList() {
+        // Clear any previous filters and display the entire list
+        itemsAdapter.clear();
+        itemsAdapter.addAll(items);
+        itemsAdapter.notifyDataSetChanged();
+    }
+
+    private void sortByAttribute(String attribute) {
+        List<TodoItem> filteredList = new ArrayList<>();
+
+        for (TodoItem item : items) {
+            if (item.getAttribute().equals(attribute)) {
+                filteredList.add(item);
+            }
+        }
+
+        // Update the adapter with the filtered list
+        itemsAdapter.clear();
+        itemsAdapter.addAll(filteredList);
+        itemsAdapter.notifyDataSetChanged();
+    }
+
     private void sortByCourse() {
         // Implement sorting by course logic here
         Collections.sort(items, new Comparator<TodoItem>() {
@@ -386,6 +410,7 @@ public class todoFragment extends Fragment {
         });
         itemsAdapter.notifyDataSetChanged();
     }
+
     private void sortByDueDate() {
         // Implement sorting by due date logic here
         Collections.sort(items, new Comparator<TodoItem>() {
@@ -423,9 +448,8 @@ public class todoFragment extends Fragment {
         });
         itemsAdapter.notifyDataSetChanged();
     }
-    private void sortByCompletionStatus() {
-        Log.d("Sort", "Sorting by completion status");
 
+    private void sortByCompletionStatus() {
         // Clear checked positions before sorting
         ((CustomArrayAdapter) itemsAdapter).clearCheckedPositions();
 
@@ -450,13 +474,8 @@ public class todoFragment extends Fragment {
         itemsAdapter.notifyDataSetChanged();
     }
 
-
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 }
-

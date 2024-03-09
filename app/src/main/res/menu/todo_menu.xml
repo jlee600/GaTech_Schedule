@@ -16,4 +16,25 @@
         android:title="Sort by Status"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_sort_by_exam"
+        android:title="Sort by Exam"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_sort_by_hw"
+        android:title="Sort by HW"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_sort_by_general"
+        android:title="Sort by General"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_reset"
+        android:title="Reset"
+        app:showAsAction="never" />
+
+
 </menu>
