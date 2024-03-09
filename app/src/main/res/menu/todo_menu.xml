@@ -11,4 +11,9 @@
         android:title="Sort by Due Date"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_sort_by_completion_status"
+        android:title="Sort by Status"
+        app:showAsAction="never" />
+
 </menu>

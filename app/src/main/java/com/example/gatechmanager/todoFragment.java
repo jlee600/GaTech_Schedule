@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class todoFragment extends Fragment {
 
@@ -58,7 +61,7 @@ public class todoFragment extends Fragment {
         private String date;
         private String time;
         private String location;
-        private boolean checked;
+        private boolean completed;
 
         public TodoItem(String description) {
             this.description = description;
@@ -67,7 +70,7 @@ public class todoFragment extends Fragment {
             this.date = "N/A";
             this.time = "N/A";
             this.location = "N/A";
-            this.checked = false;
+            this.completed = false;
         }
 
         // Getter and setter methods for all fields
@@ -119,12 +122,12 @@ public class todoFragment extends Fragment {
             this.location = location;
         }
 
-        public boolean isChecked() {
-            return checked;
+        public boolean isCompleted() {
+            return completed;
         }
 
-        public void setChecked(boolean checked) {
-            this.checked = checked;
+        public void setCompleted(boolean completed) {
+            this.completed = completed;
         }
     }
 
@@ -168,9 +171,12 @@ public class todoFragment extends Fragment {
 
     private class CustomArrayAdapter extends ArrayAdapter<TodoItem> {
         private List<TodoItem> masterList;
+        private Set<Integer> checkedPositions;
 
         public CustomArrayAdapter(Context context, List<TodoItem> objects) {
             super(context, R.layout.custom_list_item, objects);
+            this.masterList = objects;
+            this.checkedPositions = new HashSet<>();
         }
 
         @Override
@@ -182,16 +188,14 @@ public class todoFragment extends Fragment {
             TodoItem currentItem = getItem(position);
 
             CheckBox checkBox = convertView.findViewById(R.id.checkBox);
-            checkBox.setChecked(currentItem.isChecked());
-            final View finalConvertView = convertView;
+            checkBox.setOnCheckedChangeListener(null); // Remove previous listener
+
+            // Set checked state and listener
+            checkBox.setChecked(currentItem.isCompleted());
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    currentItem.setChecked(isChecked);
-                    if (isChecked) {
-                        items.remove(currentItem);
-                    }
-
+                    currentItem.setCompleted(isChecked);
                     notifyDataSetChanged();
                 }
             });
@@ -211,16 +215,39 @@ public class todoFragment extends Fragment {
             textViewTime.setText("Time: " + currentItem.getTime());
             textViewLocation.setText("Location: " + currentItem.getLocation());
 
-            convertView.setOnClickListener(new View.OnClickListener() {
+            // Edit and Remove buttons
+            ImageButton btnEdit = convertView.findViewById(R.id.btnEdit);
+            ImageButton btnRemove = convertView.findViewById(R.id.btnRemove);
+            btnEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     showEditDialog(position);
                 }
             });
+            btnRemove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeItem(position);
+                }
+            });
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // You can handle the click event for the entire item if needed
+                }
+            });
 
             return convertView;
         }
+        private void removeItem(int position) {
+            masterList.remove(position);
+            notifyDataSetChanged();
+        }
+        public void clearCheckedPositions() {
+            checkedPositions.clear();
+        }
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -331,6 +358,9 @@ public class todoFragment extends Fragment {
         } else if (itemId == R.id.menu_sort_by_due_date) {
             sortByDueDate();
             return true;
+        } else if (itemId == R.id.menu_sort_by_completion_status) {
+            sortByCompletionStatus();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -393,9 +423,32 @@ public class todoFragment extends Fragment {
         });
         itemsAdapter.notifyDataSetChanged();
     }
+    private void sortByCompletionStatus() {
+        Log.d("Sort", "Sorting by completion status");
 
+        // Clear checked positions before sorting
+        ((CustomArrayAdapter) itemsAdapter).clearCheckedPositions();
 
+        // Implement sorting logic
+        Collections.sort(items, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem item1, TodoItem item2) {
+                boolean completed1 = item1.isCompleted();
+                boolean completed2 = item2.isCompleted();
 
+                // Ensure completed items go up
+                if (completed1 && !completed2) {
+                    return -1;
+                } else if (!completed1 && completed2) {
+                    return 1;
+                } else {
+                    // Compare non-completed items
+                    return 0;
+                }
+            }
+        });
+        itemsAdapter.notifyDataSetChanged();
+    }
 
 
 
