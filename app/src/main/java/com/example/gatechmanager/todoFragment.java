@@ -43,6 +43,7 @@ public class todoFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private ArrayList<TodoItem> items;
+    private ArrayList<TodoItem> originalItems;
     private ArrayAdapter<TodoItem> itemsAdapter;
     private ListView listView;
     private EditText editTextText;
@@ -131,6 +132,29 @@ public class todoFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        items = new ArrayList<>();
+        originalItems = new ArrayList<>(items);
+        itemsAdapter = new CustomArrayAdapter(getContext(), items);
+    }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_todo, container, false);
+        listView = view.findViewById(R.id.listView);
+        button = view.findViewById(R.id.button);
+        editTextText = view.findViewById(R.id.editTextText);
+
+        listView.setAdapter(itemsAdapter);
+        button.setOnClickListener(v -> addItem(v));
+
+        setUpListViewListener();
+        setUpListViewClickListener();
+        setHasOptionsMenu(true);
+
+        return view;
+    }
 
     private void setUpListViewListener() {
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -151,6 +175,7 @@ public class todoFragment extends Fragment {
         if (!itemText.isEmpty()) {
             TodoItem newItem = new TodoItem(itemText);
             itemsAdapter.add(newItem);
+            originalItems.add(newItem);
             editTextText.setText("");
 
             // Show the edit dialog for the newly added item
@@ -235,34 +260,15 @@ public class todoFragment extends Fragment {
         }
 
         private void removeItem(int position) {
+            TodoItem removedItem = masterList.get(position);
             masterList.remove(position);
             notifyDataSetChanged();
+            originalItems.remove(removedItem);
         }
 
         public void clearCheckedPositions() {
             checkedPositions.clear();
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_todo, container, false);
-
-        listView = view.findViewById(R.id.listView);
-        button = view.findViewById(R.id.button);
-        editTextText = view.findViewById(R.id.editTextText);
-
-        items = new ArrayList<>();
-        itemsAdapter = new CustomArrayAdapter(getContext(), items);
-        listView.setAdapter(itemsAdapter);
-
-        button.setOnClickListener(v -> addItem(v));
-
-        setUpListViewListener();
-        setUpListViewClickListener();
-        setHasOptionsMenu(true);
-
-        return view;
     }
 
     private void setUpListViewClickListener() {
@@ -365,15 +371,14 @@ public class todoFragment extends Fragment {
         } else if (itemId == R.id.menu_reset) {
             resetList();
             return true;
-        } else {
-            return super.onOptionsItemSelected(item);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void resetList() {
         // Clear any previous filters and display the entire list
         itemsAdapter.clear();
-        itemsAdapter.addAll(items);
+        itemsAdapter.addAll(new ArrayList<>(originalItems));
         itemsAdapter.notifyDataSetChanged();
     }
 
@@ -393,60 +398,54 @@ public class todoFragment extends Fragment {
     }
 
     private void sortByCourse() {
-        // Implement sorting by course logic here
         Collections.sort(items, new Comparator<TodoItem>() {
             @Override
             public int compare(TodoItem item1, TodoItem item2) {
                 String course1 = item1.getCourse();
                 String course2 = item2.getCourse();
 
-                // Ensure "N/A" goes down
-                if (course1.equals("N/A") && !course2.equals("N/A")) {
-                    return 1;
-                } else if (!course1.equals("N/A") && course2.equals("N/A")) {
-                    return -1;
-                } else {
-                    // Compare non-"N/A" courses
-                    return course1.compareTo(course2);
+                // Check for null or empty course names and treat them as "zzz" so they move down in alphabetical sort
+                if ((course1 == null || course1.isEmpty()) && (course2 == null || course2.isEmpty())) {
+                    return 0; // Both are effectively equal in sorting terms
+                } else if (course1 == null || course1.isEmpty()) {
+                    return 1; // Null/empty course names move down
+                } else if (course2 == null || course2.isEmpty()) {
+                    return -1; // Null/empty course names move down
                 }
+
+                // If neither course name is null/empty, proceed with normal string comparison
+                return course1.compareToIgnoreCase(course2);
             }
         });
         itemsAdapter.notifyDataSetChanged();
     }
 
     private void sortByDueDate() {
-        // Implement sorting by due date logic here
         Collections.sort(items, new Comparator<TodoItem>() {
             @Override
             public int compare(TodoItem item1, TodoItem item2) {
                 String date1 = item1.getDate();
                 String date2 = item2.getDate();
 
-                // Ensure "N/A" goes down
-                if (date1.equals("N/A") && !date2.equals("N/A")) {
-                    return 1;
-                } else if (!date1.equals("N/A") && date2.equals("N/A")) {
-                    return -1;
-                } else if (date1.equals("N/A") && date2.equals("N/A")) {
-                    return 0; // Both are "N/A," so no change in order
-                } else {
-                    // Compare non-"N/A" dates using MMMM/dd format
-                    SimpleDateFormat format = new SimpleDateFormat("MMMM/dd", Locale.US);
-                    try {
-                        Date dateObj1 = format.parse(date1);
-                        Date dateObj2 = format.parse(date2);
+                SimpleDateFormat format = new SimpleDateFormat("MMM/dd", Locale.US); // Make sure this matches your expected input format
+                Date dateObj1, dateObj2;
 
-                        // Handle the case where dates are the same
-                        if (dateObj1.equals(dateObj2)) {
-                            return 0;
-                        }
-
-                        return dateObj1.compareTo(dateObj2);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    return 0;
+                // Convert date1 to Date object, treat invalid date as "far future"
+                try {
+                    dateObj1 = (date1 != null && !date1.isEmpty()) ? format.parse(date1) : new Date(Long.MAX_VALUE);
+                } catch (ParseException e) {
+                    dateObj1 = new Date(Long.MAX_VALUE); // Set invalid dates to "far future"
                 }
+
+                // Convert date2 to Date object, treat invalid date as "far future"
+                try {
+                    dateObj2 = (date2 != null && !date2.isEmpty()) ? format.parse(date2) : new Date(Long.MAX_VALUE);
+                } catch (ParseException e) {
+                    dateObj2 = new Date(Long.MAX_VALUE); // Set invalid dates to "far future"
+                }
+
+                // Now compare the two Date objects
+                return dateObj1.compareTo(dateObj2);
             }
         });
         itemsAdapter.notifyDataSetChanged();
@@ -475,10 +474,5 @@ public class todoFragment extends Fragment {
             }
         });
         itemsAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 }
