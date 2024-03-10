@@ -350,6 +350,9 @@ public class todoFragment extends Fragment {
         } else if (itemId == R.id.menu_sort_by_due_date) {
             sortByDueDate();
             return true;
+        } else if (itemId == R.id.menu_sort_by_completion_status) {
+            sortByCompletionStatus();
+            return true;
         } else if (itemId == R.id.menu_sort_by_exam) {
             sortByAttribute("Exam");
             return true;
