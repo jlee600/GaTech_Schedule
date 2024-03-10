@@ -132,6 +132,7 @@ public class todoFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +140,7 @@ public class todoFragment extends Fragment {
         originalItems = new ArrayList<>(items);
         itemsAdapter = new CustomArrayAdapter(getContext(), items);
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_todo, container, false);
@@ -356,8 +358,11 @@ public class todoFragment extends Fragment {
         } else if (itemId == R.id.menu_sort_by_due_date) {
             sortByDueDate();
             return true;
-        } else if (itemId == R.id.menu_sort_by_completion_status) {
+        } else if (itemId == R.id.menu_sort_by_complete) {
             sortByCompletionStatus();
+            return true;
+        } else if (itemId == R.id.menu_sort_by_incomplete) {
+            sortByIncompletionStatus();
             return true;
         } else if (itemId == R.id.menu_sort_by_exam) {
             sortByAttribute("Exam");
@@ -452,27 +457,32 @@ public class todoFragment extends Fragment {
     }
 
     private void sortByCompletionStatus() {
-        // Clear checked positions before sorting
-        ((CustomArrayAdapter) itemsAdapter).clearCheckedPositions();
+        List<TodoItem> completedList = new ArrayList<>();
 
-        // Implement sorting logic
-        Collections.sort(items, new Comparator<TodoItem>() {
-            @Override
-            public int compare(TodoItem item1, TodoItem item2) {
-                boolean completed1 = item1.isCompleted();
-                boolean completed2 = item2.isCompleted();
-
-                // Ensure completed items go up
-                if (completed1 && !completed2) {
-                    return -1;
-                } else if (!completed1 && completed2) {
-                    return 1;
-                } else {
-                    // Compare non-completed items
-                    return 0;
-                }
+        for (TodoItem item : items) {
+            if (item.isCompleted()) {
+                completedList.add(item);
             }
-        });
+        }
+
+        // Update the adapter with the sorted list
+        itemsAdapter.clear();
+        itemsAdapter.addAll(completedList);
+        itemsAdapter.notifyDataSetChanged();
+    }
+    private void sortByIncompletionStatus() {
+        List<TodoItem> incompleteList = new ArrayList<>();
+
+        for (TodoItem item : items) {
+            if (!item.isCompleted()) {
+                incompleteList.add(item);
+            }
+        }
+
+        // Update the adapter with the sorted list
+        itemsAdapter.clear();
+        itemsAdapter.addAll(incompleteList);
         itemsAdapter.notifyDataSetChanged();
     }
 }
+

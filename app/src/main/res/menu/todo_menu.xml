@@ -12,8 +12,12 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_sort_by_completion_status"
-        android:title="Sort by Status"
+        android:id="@+id/menu_sort_by_complete"
+        android:title="Sort by Complete"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_sort_by_incomplete"
+        android:title="Sort by Incomplete"
         app:showAsAction="never" />
 
     <item
