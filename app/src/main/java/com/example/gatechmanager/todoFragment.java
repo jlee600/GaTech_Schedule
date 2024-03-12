@@ -327,11 +327,26 @@ public class todoFragment extends Fragment {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                Context context = getContext().getApplicationContext();
+                String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
+                String regexDate = "^[A-Za-z]{3}/\\d{2}$";
+                if (attributeSpinner.getSelectedItem().toString().isEmpty()|| courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
+                || timeEditText.getText().toString().isEmpty()) {
+                    Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
+                }
                 currentItem.setDescription(descriptionEditText.getText().toString());
                 currentItem.setAttribute(attributeSpinner.getSelectedItem().toString());
                 currentItem.setCourse(courseEditText.getText().toString());
-                currentItem.setDate(dateEditText.getText().toString());
-                currentItem.setTime(timeEditText.getText().toString());
+                if (!dateEditText.getText().toString().matches(regexDate)) {
+                    Toast.makeText(context, "Please enter a valid date (MM/DD)", Toast.LENGTH_LONG).show();
+                } else {
+                    currentItem.setDate(dateEditText.getText().toString());
+                }
+                if (!timeEditText.getText().toString().matches(regex)) {
+                    Toast.makeText(context, "Please enter a valid time (HH:MM)", Toast.LENGTH_LONG).show();
+                } else {
+                    currentItem.setTime(timeEditText.getText().toString());
+                }
                 currentItem.setLocation(locationEditText.getText().toString());
 
                 itemsAdapter.notifyDataSetChanged();
