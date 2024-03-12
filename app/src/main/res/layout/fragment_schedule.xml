@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".scheduleFragment">
 
+    <!-- Add the ListView -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/addButton" />
+
+    <!-- Floating Action Button for adding items -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addButton"
         android:layout_width="wrap_content"
@@ -13,8 +21,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="31dp"
+        android:layout_marginBottom="16dp"
         app:backgroundTint="@color/green"
         app:fabSize="normal"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@android:drawable/ic_input_add"/>
+
 </RelativeLayout>

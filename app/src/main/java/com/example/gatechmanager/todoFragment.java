@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -330,25 +329,25 @@ public class todoFragment extends Fragment {
                 Context context = getContext().getApplicationContext();
                 String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
                 String regexDate = "^[A-Za-z]{3}/\\d{2}$";
-                if (attributeSpinner.getSelectedItem().toString().isEmpty()|| courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
+                if (descriptionEditText.getText().toString().isEmpty() ||courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
                 || timeEditText.getText().toString().isEmpty()) {
                     Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
-                }
-                currentItem.setDescription(descriptionEditText.getText().toString());
-                currentItem.setAttribute(attributeSpinner.getSelectedItem().toString());
-                currentItem.setCourse(courseEditText.getText().toString());
-                if (!dateEditText.getText().toString().matches(regexDate)) {
-                    Toast.makeText(context, "Please enter a valid date (MM/DD)", Toast.LENGTH_LONG).show();
                 } else {
-                    currentItem.setDate(dateEditText.getText().toString());
+                    currentItem.setDescription(descriptionEditText.getText().toString());
+                    currentItem.setAttribute(attributeSpinner.getSelectedItem().toString());
+                    currentItem.setCourse(courseEditText.getText().toString());
+                    currentItem.setLocation(locationEditText.getText().toString());
+                    if (!dateEditText.getText().toString().matches(regexDate)) {
+                        Toast.makeText(context, "Please enter a valid date (MM/DD)", Toast.LENGTH_LONG).show();
+                    } else {
+                        currentItem.setDate(dateEditText.getText().toString());
+                    }
+                    if (!timeEditText.getText().toString().matches(regex)) {
+                        Toast.makeText(context, "Please enter a valid time (HH:MM)", Toast.LENGTH_LONG).show();
+                    } else {
+                        currentItem.setTime(timeEditText.getText().toString());
+                    }
                 }
-                if (!timeEditText.getText().toString().matches(regex)) {
-                    Toast.makeText(context, "Please enter a valid time (HH:MM)", Toast.LENGTH_LONG).show();
-                } else {
-                    currentItem.setTime(timeEditText.getText().toString());
-                }
-                currentItem.setLocation(locationEditText.getText().toString());
-
                 itemsAdapter.notifyDataSetChanged();
             }
         });
