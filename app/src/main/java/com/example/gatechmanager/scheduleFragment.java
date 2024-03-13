@@ -275,28 +275,41 @@ public class scheduleFragment extends Fragment {
                 Context context = getContext().getApplicationContext();
                 String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
                 String regexProfessor = "^[A-Za-z]+$";
+                String regexDate = "^[MTWRF]+$";
+                boolean isReady = true;
                 if (profEditText.getText().toString().isEmpty() || courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
                         || timeEditText.getText().toString().isEmpty() || locationEditText.getText().toString().isEmpty()) {
                     Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
                     showEditDialog(position);
+                    isReady = false;
                 } else {
                     currentItem.setDescription(descriptionEditText.getText().toString());
                     if (!profEditText.getText().toString().matches(regexProfessor)) {
                         Toast.makeText(context, "Please enter a valid professor name (Pedro)", Toast.LENGTH_LONG).show();
+                        isReady = false;
+                        showEditDialog(position);
                     } else {
                         currentItem.setProfessor(profEditText.getText().toString());
                     }
                     currentItem.setCourse(courseEditText.getText().toString());
-                    currentItem.setDate(dateEditText.getText().toString());
+                    if (!dateEditText.getText().toString().matches(regexDate)) {
+                        Toast.makeText(context, "Please enter a valid day (MTWRF)", Toast.LENGTH_LONG).show();
+                        isReady = false;
+                        showEditDialog(position);
+                    } else {
+                        currentItem.setDate(dateEditText.getText().toString());
+                    }
                     currentItem.setLocation(locationEditText.getText().toString());
 
                     if (!timeEditText.getText().toString().matches(regex)) {
                         Toast.makeText(context, "Please enter a valid time (HH:MM)", Toast.LENGTH_LONG).show();
+                        isReady = false;
+                        showEditDialog(position);
                     } else {
                         currentItem.setTime(timeEditText.getText().toString());
                     }
                 }
-                if (position == -1) {
+                if (position == -1 && isReady) {
                     itemsAdapter.add(currentItem);
                 }
 
