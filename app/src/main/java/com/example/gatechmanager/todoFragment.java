@@ -332,6 +332,7 @@ public class todoFragment extends Fragment {
                 if (descriptionEditText.getText().toString().isEmpty() ||courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
                 || timeEditText.getText().toString().isEmpty()) {
                     Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
+                    showEditDialog(position);
                 } else {
                     currentItem.setDescription(descriptionEditText.getText().toString());
                     currentItem.setAttribute(attributeSpinner.getSelectedItem().toString());
