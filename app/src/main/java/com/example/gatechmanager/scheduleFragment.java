@@ -274,12 +274,18 @@ public class scheduleFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 Context context = getContext().getApplicationContext();
                 String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
+                String regexProfessor = "^[A-Za-z]+$";
                 if (profEditText.getText().toString().isEmpty() || courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
                         || timeEditText.getText().toString().isEmpty() || locationEditText.getText().toString().isEmpty()) {
                     Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
+                    showEditDialog(position);
                 } else {
                     currentItem.setDescription(descriptionEditText.getText().toString());
-                    currentItem.setProfessor(profEditText.getText().toString());
+                    if (!profEditText.getText().toString().matches(regexProfessor)) {
+                        Toast.makeText(context, "Please enter a valid professor name (Pedro)", Toast.LENGTH_LONG).show();
+                    } else {
+                        currentItem.setProfessor(profEditText.getText().toString());
+                    }
                     currentItem.setCourse(courseEditText.getText().toString());
                     currentItem.setDate(dateEditText.getText().toString());
                     currentItem.setLocation(locationEditText.getText().toString());
