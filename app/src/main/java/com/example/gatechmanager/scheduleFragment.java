@@ -288,7 +288,7 @@ public class scheduleFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 Context context = getContext().getApplicationContext();
                 String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-                String regexProfessor = "^[A-Za-z]+$";
+                String regexProfessor = "^[A-Za-z ]+$";
                 String regexDate = "^[MTWRF]+$";
                 boolean isReady = true;
                 if (profEditText.getText().toString().isEmpty() || courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
