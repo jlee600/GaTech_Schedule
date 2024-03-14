@@ -21,9 +21,15 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.SharedPreferences;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class scheduleFragment extends Fragment {
+    private static final String SCHEDULE_ITEMS_KEY = "schedule_items";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private ArrayList<scheduleFragment.ScheduleItem> items;
@@ -108,14 +114,18 @@ public class scheduleFragment extends Fragment {
         items = new ArrayList<>();
         originalItems = new ArrayList<>(items);
         itemsAdapter = new CustomArrayAdapter(getContext(), items);
+        loadScheduleItems();
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        if (items == null) {
+            items = new ArrayList<>();
+        }
+        if (itemsAdapter == null) {
+            itemsAdapter = new CustomArrayAdapter(getContext(), items);
+        }
 
-        items = new ArrayList<>();
-        itemsAdapter = new CustomArrayAdapter(getContext(), items);
         listView = view.findViewById(R.id.listView);
         listView.setAdapter(itemsAdapter);
 
@@ -129,6 +139,7 @@ public class scheduleFragment extends Fragment {
         return view;
     }
 
+
     private void setUpListViewListener() {
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -137,6 +148,7 @@ public class scheduleFragment extends Fragment {
                 Toast.makeText(context, "Removed from Schedule", Toast.LENGTH_LONG).show();
                 items.remove(position);
                 itemsAdapter.notifyDataSetChanged();
+                saveScheduleItems();
                 return true;
             }
         });
@@ -149,6 +161,7 @@ public class scheduleFragment extends Fragment {
         // Hide the keyboard
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        saveScheduleItems();
     }
 
     private class CustomArrayAdapter extends ArrayAdapter<scheduleFragment.ScheduleItem> {
@@ -178,7 +191,7 @@ public class scheduleFragment extends Fragment {
 
             textViewProfessor.setText("Professor: " + currentItem.getProfessor());
             textViewCourse.setText("Section: " + currentItem.getCourse());
-            textViewDate.setText("Date: " + currentItem.getDate());
+            textViewDate.setText("Days: " + currentItem.getDate());
             textViewTime.setText("Time: " + currentItem.getTime());
             textViewLocation.setText("Location: " + currentItem.getLocation());
 
@@ -211,6 +224,7 @@ public class scheduleFragment extends Fragment {
             masterList.remove(position);
             notifyDataSetChanged();
             originalItems.remove(removedItem);
+            saveScheduleItems();
         }
     }
 
@@ -253,7 +267,7 @@ public class scheduleFragment extends Fragment {
         layout.addView(courseEditText);
 
         final EditText dateEditText = new EditText(getContext());
-        dateEditText.setHint("Date (MW / TR)");
+        dateEditText.setHint("Days (MW / TR)");
         dateEditText.setText(currentItem.getDate());
         layout.addView(dateEditText);
 
@@ -314,9 +328,28 @@ public class scheduleFragment extends Fragment {
                 }
 
                 itemsAdapter.notifyDataSetChanged();
+                saveScheduleItems();
             }
         });
         builder.show();
+    }
+    private void saveScheduleItems() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("schedule_prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(items);
+        editor.putString(SCHEDULE_ITEMS_KEY, json);
+        editor.apply();
+    }
+    private void loadScheduleItems() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("schedule_prefs", Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString(SCHEDULE_ITEMS_KEY, "");
+        if (!json.isEmpty()) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<ScheduleItem>>() {}.getType();
+            items.addAll(gson.fromJson(json, type));
+            itemsAdapter.notifyDataSetChanged();
+        }
     }
 }
 

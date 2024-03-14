@@ -3,6 +3,7 @@ package com.example.gatechmanager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
@@ -26,6 +27,10 @@ import android.widget.Toast;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Spinner;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +43,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class todoFragment extends Fragment {
+    private static final String TODO_ITEMS_KEY = "todo_items";
     public static final String[] VALID_ATTRIBUTES = {"Exam", "HW", "General"};
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -138,6 +144,36 @@ public class todoFragment extends Fragment {
         items = new ArrayList<>();
         originalItems = new ArrayList<>(items);
         itemsAdapter = new CustomArrayAdapter(getContext(), items);
+        loadTodoItems();
+    }
+    public void onDestroy() {
+        super.onDestroy();
+        saveTodoItems();
+    }
+    private void loadTodoItems() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("todo_prefs", Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString(TODO_ITEMS_KEY, "");
+        if (!json.isEmpty()) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<TodoItem>>() {}.getType();
+            items.clear(); // Clear existing items
+            originalItems.clear(); // Clear existing original items
+            items.addAll(gson.fromJson(json, type)); // Add loaded items to the list
+            originalItems.addAll(items); // Add loaded items to the original list
+            itemsAdapter.notifyDataSetChanged(); // Notify adapter of changes
+        }
+    }
+    private void saveTodoItems() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("todo_prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(items);
+        editor.putString(TODO_ITEMS_KEY, json);
+        editor.apply();
+    }
+    public void onResume() {
+        super.onResume();
+        loadTodoItems();
     }
 
     @Override
@@ -175,7 +211,7 @@ public class todoFragment extends Fragment {
         String itemText = editTextText.getText().toString();
         if (!itemText.isEmpty()) {
             TodoItem newItem = new TodoItem(itemText);
-            itemsAdapter.add(newItem);
+            itemsAdapter.add(newItem);  // <-- Adding new item to the adapter
             originalItems.add(newItem);
             editTextText.setText("");
 
@@ -189,6 +225,8 @@ public class todoFragment extends Fragment {
             Toast.makeText(context, "Please Enter Text...", Toast.LENGTH_LONG).show();
         }
     }
+
+
 
     private class CustomArrayAdapter extends ArrayAdapter<TodoItem> {
         private List<TodoItem> masterList;
@@ -264,8 +302,10 @@ public class todoFragment extends Fragment {
             TodoItem removedItem = masterList.get(position);
             masterList.remove(position);
             notifyDataSetChanged();
-            originalItems.remove(removedItem);
+            originalItems.remove(removedItem); // Remove from the original list
+            items.remove(removedItem); // Remove from the main list
         }
+
 
         public void clearCheckedPositions() {
             checkedPositions.clear();
@@ -328,7 +368,7 @@ public class todoFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 Context context = getContext().getApplicationContext();
                 String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-                String regexDate = "^[A-Za-z]{3}/\\d{2}$";
+                String regexDate = "^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/(0?[1-9]|[12][0-9]|3[01])$";
                 if (descriptionEditText.getText().toString().isEmpty() ||courseEditText.getText().toString().isEmpty()|| dateEditText.getText().toString().isEmpty()
                 || timeEditText.getText().toString().isEmpty()) {
                     Toast.makeText(context, "All entries must be non-null", Toast.LENGTH_LONG).show();
